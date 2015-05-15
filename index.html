@@ -103,9 +103,9 @@
 				</section>
 
 				<section>
-				  von Neumann architecture: Abstract model of how a computer works:
+				  <h3>von Neumann architecture: Abstract model of how a computer works:</h3>
 
-				  <img src="1000px-Von_Neumann_Architecture.svg.png" style="background-color:white;">
+				  <img src="Von_Neumann_Architecture.svg" style="background-color:white;">
 
 				</section>
 
@@ -125,8 +125,27 @@
 				</section>
 
 				<section>
-				  <img src="CPU.png" width="435" height="434" style="background-color:white;">
+				  <h4>Major functional blocks of Intel Core2 processor (~10 years old)</h4>
+				  <img src="Intel_Core2_arch.svg" width="500" height="579" style="background-color:white;">
 				</section>
+
+				<section>
+				  Something happened around 2005...
+				  <img src="CPU.png" width="435" height="434" style="background-color:white;">
+				  <p>
+				    Switching power P ~ CfV<sup>2</sup> + P<sub>static</sub>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### The result
+					  - The "Power Wall" *combined with*
+					  - Increasing ILP through microarchitectural tricks running out of steam
+
+					  => Instead of new CPU's that could run old code faster we got *multiple cores*. Thus shifting the burden of improving performance from the CPU designers to the programmers (i.e. YOU!)
+					</script>
+				</section>
+
 
 				<section>
 				  <h5>Latency Comparison Numbers (Jeff Dean, Google)</h5>
