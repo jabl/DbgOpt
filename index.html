@@ -142,13 +142,20 @@
 					  - The "Power Wall" *combined with*
 					  - Increasing ILP through microarchitectural tricks running out of steam
 
-					  => Instead of new CPU's that could run old code faster we got *multiple cores*. Thus shifting the burden of improving performance from the CPU designers to the programmers (i.e. YOU!)
+					  => Instead of new CPU's that could run existing (non-parallel) code faster we got *multiple cores*. Thus shifting the burden of improving performance from the CPU designers to the programmers (i.e. YOU!)
 					</script>
 				</section>
 
+				<section data-markdown>
+					<script type="text/template">
+					  Low level optimization these days is mostly about avoiding stalling on accessing main memory.
+
+					  In HPC, vectorization can also be important. Increasingly so with newer processors.
+					</script>
+				</section>
 
 				<section>
-				  <h5>Latency Comparison Numbers (Jeff Dean, Google)</h5>
+				  <h4>Latency Comparison Numbers (Jeff Dean, Google)</h4>
 <code><pre>
 L1 cache reference                            0.5 ns
 Branch mispredict                             5   ns
@@ -168,11 +175,162 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 
 				</section>
 
+				<section>
+				  <h4>SCI Cluster node double precision FP throughput</h4>
+
+				  <table>
+				      <tr>
+					<th>Generation<th>Clock (GHz)<th>CPU cores<th>Scalar thr (flops/core/cycle)<th>Vector thr (flops/core/cycle)
+					<th>Total thr (GFlops/s)
+				      </tr>
+				      <tr>
+					<td>Kvartsi2004<td>2.2<td>1<td>2<td>2 SSE2<td>8.8
+				      </tr>
+				      <tr>
+					<td>Kvartsi2006<td>2.4<td>2<td>2<td>2<td>19.2
+				      </tr>
+				      <tr>
+					<td>Triton2009<td>2.6<td>6<td>2<td>4 SSE2 hw<td>125
+				      </tr>
+				      <tr>
+					<td>Triton2011<td>2.66<td>6<td>2<td>4<td>128
+				      </tr>
+				      <tr>
+					<td>Triton2014<td>2.8<td>10<td>2<td>8 AVX<td>448
+				      </tr>
+				      <tr>
+					<td>Triton2015?<td>2.6<td>12<td>2<td>16 AVX2<td>998
+				      </tr>
+				    </table>
+				</section>
+
 				<section data-markdown>
 					<script type="text/template">
-					  Low level optimization these days is mostly about avoiding stalling on accessing main memory.
+					  ### Take home message (vectorization)
+					  
+					  During the past decade,
+					  clock speed and scalar
+					  throughput has remained
+					  roughly
+					  constant. Performance
+					  improvement from
+					  parallelization,
+					  vectorization, and as of
+					  Xeon Haswell generation,
+					  also FMA (a*b+c operation).
 
-					  In HPC, vectorization can also be important. Increasingly so with newer processors.
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Memory
+					  
+					  Pages, cachelines, prefetching, addressing, oh my!
+
+					  Logically, memory is byte (1
+					  byte == 8 bits)
+					  addressable. Behind the
+					  covers, a lot of stuff
+					  happens.
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Memory virtual addressing
+					  
+					  - Each process receives its own 64-bit virtual address space. 
+					  - Virtual addresses are translated to actual physical addresses.
+					  - A special data structure called a *page table* describes the mapping from virtual addresses to physical addresses. The OS sets up page tables when creating a process, and modifies them on request (brk()/sbrk()/mmap())
+					  - The granularity of this virtual -> physical mapping is the *page size*. On x86, the standard page size is 4 kB, although so called hugepages (2MB, 1 GB) also possible and may be useful is some special circumstances.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### TLB
+					  
+					  - There is a special cache for virtual -> physical mappings, the *Translation Lookaside Buffer (TLB)*. 
+					  - This cache is needed for *every* memory access, so needs to be very fast. However, it's quite small. => If you have an algorithm that accesses memory all over the place, performance may be bottlenecked by TLB misses.
+					  
+					  
+					</script>
+				</section>
+
+				<section>
+				  <h3>Accessing memory and virtual->physical mapping</h3>
+
+				  <img src="Page_table_actions.svg" width="625" height="405" style="background-color:white;">
+
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  #### Memory not mapped in page table
+					  
+					  - If the virtual address is not present in the page table mapping, the process will trap into the OS.
+					  - If the OS determines that the virtual address was invalid, kills the program with SIGSEGV (segmentation fault).
+					  - If the mapping is valid but this is the first time it's accessed, allocate physical memory and set up the page table mapping. *Note*: This happens when accessing the memory, not when executing malloc()/new/ALLOCATE/etc.!
+					  - If the mapping is to a file (mmap() syscall), read data from file into page cache, setup page table mapping.
+					  
+					  
+					</script>
+				</section>
+
+				<section>
+				  <h3>Caching</h3>
+
+				  <ul>
+				    <li>Since memory is (relatively) slow, multiple levels of cache
+				    <li>Typical contemporary configuration
+				  </ul>
+				  
+				  <table>
+				    <tr>
+				      <th>Type<th>Size (kB)<th>Min latency (clock cycles)
+				    </tr>
+				    <tr>
+				      <td>L1<td>32+32<td>4
+				    </tr>
+				    <tr>
+				      <td>L2<td>256<td>11
+				    </tr>
+				    <tr>
+				      <td>L3<td>2500 (per core, shared)<td>36
+				    </tr>
+				    <tr>
+				      <td>main, local<td>-<td>200
+				    </tr>
+				    <tr>
+				      <td>main, non-local<td>-<td>300(?)
+				    </tr>
+				    </table>
+
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Caching and prefetching
+
+					  - Prefetchers: Hardware circuits that detect common memory access patterns, and fetch data from memory into cache (assuming the pattern continues).
+					  
+					  - Cacheline: granularity of
+					  transfer from main memory to
+					  caches. Typically 64 bytes
+					  on current x86.
+					  
+					  - Caches, prefetching
+					  etc. works well with code
+					  that has nice predictable
+					  access patterns and exhibit
+					  *locality of reference*.
+
+					  - Random access: Not so good
+					  (bottleneck is latency
+					  rather than bandwidth).
 					</script>
 				</section>
 
