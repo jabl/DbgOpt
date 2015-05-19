@@ -366,6 +366,71 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - [Galal, Horowitz: Energy-Efficient Floating-Point Unit Design](http://dx.doi.org/10.1109/TC.2010.121)
 					</script>
 				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Introduction to GDB
+
+					  - GDB, the GNU debugger, is the standard debugger on Linux for C, C++, Fortran and several other languages that compile to native code
+					  - Continuously developed since 1986
+					  - LOTS of features
+					    - Here we concentrate on a VERY SMALL subset of the most common operations
+					  - Various graphical frontends also available. E.g. Eclipse, DDD.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Why use a debugger
+
+					  - printf() debugging: Insert print calls in your program, deduce where the bug is
+					    - Simple
+					    - ...but time-consuming
+					  - A debugger lets you run the program, stop it where you want (breakpoints), inspect and modify the program state, etc.
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Getting started
+
+					  Always include -g in your compile options. This adds *debug symbols* to your executable.
+
+					  - Even if you're not explicitly debugging your code. Makes debugging easier if you encounter an unexpected error later.
+					  - Makes the executable bigger, but this is in practice never an issue in HPC
+					  - With higher optimization levels a lot of transformations are done on the code
+					      - Difficult to see how the code you're debugging corresponds to the source code.
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # GDB References
+
+					  - [GDB Manual](http://sourceware.org/gdb/current/onlinedocs/gdb/)
+					  - [Beej's Quick Guide to GDB](http://beej.us/guide/bggdb/)
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Profiling
+
+					  - Focus on perf
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Other tools
+
+					  - valgrind
+					  - {Address, thread, undefined behavior} sanitizer
+					  - [American fuzzy lop (afl)](http://lcamtuf.coredump.cx/afl/)
+					</script>
+				</section>
 			</div>
 
 		</div>
