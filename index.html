@@ -78,7 +78,7 @@
 
 				<section data-markdown>
 					<script type="text/template">
-					  ### Why not both high productivity and high performance?
+					  ### Side note, Why not both high productivity and high performance?
 					  
 					  Indeed, why not?
 
@@ -146,11 +146,31 @@
 					</script>
 				</section>
 
+                                <section data-markdown>
+					<script type="text/template">
+					  ### Transistors vs. wires
+					  - Old rule of thumb: Transistors expensive, wires cheap
+					    - That is: Focus on arithmetic, don't worry about data movement.
+					  - Today:
+					    - DP FMA: 25 pJ/flop (read 3 operands, write 1)
+					    - Registers: 5 pJ/flop
+					    - Fetch DP from cache: 20-125 pJ
+					    - Fetch DP from memory: 1 nJ
+					  - Current rule of thumb: Transistors cheap, wires expensive.
+					    - Old rule wasn't wrong *back when it was formulated*, what happened? Semiconductor scaling trends...
+
+					</script>
+				</section>
+
+
 				<section data-markdown>
 					<script type="text/template">
-					  Low level optimization these days is mostly about avoiding stalling on accessing main memory.
-
-					  In HPC, vectorization can also be important. Increasingly so with newer processors.
+					  ### Implications:
+					  - Low level optimization these days is mostly about managing memory access
+					    - Avoiding stalling on accessing main memory.
+					    - Cache friendly algorithms
+					    - Register allocation? Don't worry, compilers are better at this than you..
+					  - In HPC, vectorization can also be important. Increasingly so with newer processors.
 					</script>
 				</section>
 
@@ -341,6 +361,9 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - Hennessy, Patterson: Computer Architecture: A Quantitative Approach. 
 					  - [Ulrich Drepper: What Every Programmer should know about memory](http://akkadia.org/drepper/cpumemory.pdf)
 					  - [Sutter: The free lunch is over](http://www.gotw.ca/publications/concurrency-ddj.htm)
+					  - [Sodani: Multicore trends in High Performance Computing](https://www.sics.se/sites/default/files/pub/sics.se/avinash_final_sweden_many_core_day_keynote_-_avinash_final_-_clean.pdf)
+					  
+					  - [Galal, Horowitz: Energy-Efficient Floating-Point Unit Design](http://dx.doi.org/10.1109/TC.2010.121)
 					</script>
 				</section>
 			</div>
