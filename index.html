@@ -404,11 +404,24 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					<script type="text/template">
 					  # Undefined behavior
 
-					  - The C/C++/Fortran standards specify a lot of cases like if you do X, the result is undefined behavior.
+					  - The C/C++/Fortran standards specify a lot of cases where if you do X, the result is undefined behavior.
 					     - It might work (for some definition of *work*)
 					     - Or it might not
 					     - It might work differently depending on optimization level, compiler version, phase of the moon, whatever...
 					  - Undefined behavior is your enemy!
+					  - Typical UB: reading uninitialized memory, integer overflow. Out-of-bounds access: Invalid, not UB!
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Sanitizers
+
+					  - Recent versions of GCC (and clang) support *sanitizers*
+					  - -fsanitize=xxx
+					  - address: Fast memory error detector, detect out-of-bounds access and use-after-free
+					  - thread: Data race detector
+					  - undefined: Catches many common cases of UB
 					</script>
 				</section>
 
@@ -444,9 +457,37 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - Even if you're not explicitly debugging your code. Makes debugging easier if you encounter an unexpected error later.
 					  - Makes the executable bigger, but this is in practice never an issue in HPC
 					  - With higher optimization levels a lot of transformations are done on the code
-					      - Difficult to see how the code you're debugging corresponds to the source code.
+					     - Difficult to see how the code you're debugging corresponds to the source code. GCC 4.8+: -Og
 					  
 					</script>
+				</section>
+
+				<section>
+				  <h2>Simple GDB example</h2>
+
+				  <p>
+				    foo.c:
+				    <pre><code data-trim>
+#include &lt;stdio.h>
+int main()
+{
+	int *a = NULL;
+	*a = 42;
+	printf("%d\n", *a);
+	return 0;
+}
+				    </code></pre>
+
+				    <pre><code data-trim>
+$ gcc -Og -g foo.c
+$ ./a.out
+Segmentation fault (core dumped)
+$ gdb ./a.out
+(gdb) r
+Program received signal SIGSEGV, Segmentation fault.
+main () at foo.c:5
+5		*a = 42;
+				    </code></pre>
 				</section>
 
 				<section data-markdown>
@@ -457,6 +498,7 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - [Beej's Quick Guide to GDB](http://beej.us/guide/bggdb/)
 					</script>
 				</section>
+		
 
 				<section data-markdown>
 					<script type="text/template">
@@ -471,7 +513,6 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  # Other tools
 
 					  - valgrind
-					  - {Address, thread, undefined behavior} sanitizer
 					  - [American fuzzy lop (afl)](http://lcamtuf.coredump.cx/afl/)
 					</script>
 				</section>
