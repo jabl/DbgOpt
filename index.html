@@ -150,26 +150,38 @@
 					<script type="text/template">
 					  ### Transistors vs. wires
 					  - Old rule of thumb: Transistors expensive, wires cheap
-					    - That is: Focus on arithmetic, don't worry about data movement.
-					  - Today:
-					    - DP FMA: 25 pJ/flop (read 3 operands, write 1)
-					    - Registers: 5 pJ/flop
-					    - Fetch DP from cache: 20-125 pJ
-					    - Fetch DP from memory: 1 nJ
-					  - Current rule of thumb: Transistors cheap, wires expensive.
-					    - Old rule wasn't wrong *back when it was formulated*, what happened? Semiconductor scaling trends...
-
+					     - That is: Focus on arithmetic, don't worry about data movement.
+					  - Energy cost of FP computing:
+					     - DP FMA: 25 pJ/flop (read 3 operands, write 1)
+					     - Registers: 5 pJ/flop
+					     - Fetch DP from cache: 20-125 pJ
+					     - Fetch DP from memory: 1 nJ
 					</script>
 				</section>
+
+                                <section>
+                                  <h3>Transistors vs. wires</h3>
+				  
+				  <p>
+				    <ul>
+				      <li>Current rule of thumb: Transistors cheap, wires expensive.
+                                      <li>So was the old rule wrong all the time? No, <i>back when it was formulated</i> it was Ok. So what happened?
+					<ul>
+					  <li>Semiconductor scaling trends...
+					</ul>
+				      <li>This trend is continuing
+				      <li>Processors are, and will become more so, bandwidth/latency starved rather than bottlenecked by arithmetic performance.
+				    </ul>
+                                </section>
 
 
 				<section data-markdown>
 					<script type="text/template">
 					  ### Implications:
 					  - Low level optimization these days is mostly about managing memory access
-					    - Avoiding stalling on accessing main memory.
-					    - Cache friendly algorithms
-					    - Register allocation? Don't worry, compilers are better at this than you..
+					     - Avoiding stalling on accessing main memory.
+					     - Cache friendly algorithms
+					     - Register allocation? Don't worry, compilers are better at this than you..
 					  - In HPC, vectorization can also be important. Increasingly so with newer processors.
 					</script>
 				</section>
@@ -294,7 +306,7 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - If the virtual address is not present in the page table mapping, the process will trap into the OS.
 					  - If the OS determines that the virtual address was invalid, kills the program with SIGSEGV (segmentation fault).
 					  - If the mapping is valid but this is the first time it's accessed, allocate physical memory and set up the page table mapping. *Note*: This happens when accessing the memory, not when executing malloc()/new/ALLOCATE/etc.!
-					  - If the mapping is to a file (mmap() syscall), read data from file into page cache, setup page table mapping.
+					  - If the mapping is to a file (mmap() syscall), (read data from disk into page cache), setup page table mapping.
 					  
 					  
 					</script>
@@ -349,8 +361,6 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  *locality of reference*.
 
 					  - Random access: Not so good
-					  (bottleneck is latency
-					  rather than bandwidth).
 					</script>
 				</section>
 
@@ -373,8 +383,7 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 
 					  - GDB, the GNU debugger, is the standard debugger on Linux for C, C++, Fortran and several other languages that compile to native code
 					  - Continuously developed since 1986
-					  - LOTS of features
-					    - Here we concentrate on a VERY SMALL subset of the most common operations
+					  - LOTS of features; Here we concentrate on a VERY SMALL subset of the most common operations
 					  - Various graphical frontends also available. E.g. Eclipse, DDD.
 					</script>
 				</section>
