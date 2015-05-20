@@ -379,6 +379,41 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 
 				<section data-markdown>
 					<script type="text/template">
+					  # Debugging
+
+					  - Debugging, the process of finding and correcting programming errors
+					  - Richard has covered general debugging topics and python specific stuff
+					     - This part is about debugging C/C++/Fortran code
+					  - General debugging options for the compiler
+					  - GDB tutorial
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Compiler debug options
+
+					  - Compilers have lots of switches to turn on warning and error messsages, use them!
+					  - For GCC: -Wall -Wextra -pedantic -Werror
+					  - GFortran: The above + -fcheck=all. This makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though.
+					  - Intel compilers: See manual
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Undefined behavior
+
+					  - The C/C++/Fortran standards specify a lot of cases like if you do X, the result is undefined behavior.
+					     - It might work (for some definition of *work*)
+					     - Or it might not
+					     - It might work differently depending on optimization level, compiler version, phase of the moon, whatever...
+					  - Undefined behavior is your enemy!
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
 					  # Introduction to GDB
 
 					  - GDB, the GNU debugger, is the standard debugger on Linux for C, C++, Fortran and several other languages that compile to native code
