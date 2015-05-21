@@ -368,6 +368,29 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 
 				<section data-markdown>
 					<script type="text/template">
+					  ### Cache associativity
+					  
+					  - The cache can be thought of as consisting of a set of *slots*, each capable if holding a cacheline worth of data.
+					  - Direct mapped cache: Each memory address can go into a single slot in the cache
+					     - High possibility of *associativity conflict*
+					  - Fully associative cache: Each memory address can go into any slot in the cache
+					     - Complex, slow circuitry
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Set-associative cache
+					  
+					  - N-way set associative cache: Each memory address can go into N different slots in the cache. Essentially a middle ground between direct mapped and fully associative.
+					     - Current CPU's typically have 4- or 8-way set associative caches
+					  - Exercise: Consider a two-dimensional array (matrix) stored in column-major ordering (Fortran, MATLAB, Julia) where the number of rows is an even multiple of the cacheline size.
+					     - Imagine accessing the matrix row-wise. What happens with the cache?
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
 					  # References
 
 					  - Hennessy, Patterson: Computer Architecture: A Quantitative Approach. 
