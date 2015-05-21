@@ -385,43 +385,81 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - Richard has covered general debugging topics and python specific stuff
 					     - This part is about debugging C/C++/Fortran code
 					  - General debugging options for the compiler
+					  - A few useful debugging tools
 					  - GDB tutorial
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-					  # Compiler debug options
+					  ## Compiler debug options
 
 					  - Compilers have lots of switches to turn on warning and error messsages, use them!
 					  - For GCC: -Wall -Wextra -pedantic -Werror
-					  - GFortran: The above + -fcheck=all. This makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though.
+					  - GFortran: The above + -fcheck=all -ffpe-trap=invalid,zero,overflow. Note that -fcheck= makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though. -ffpe-trap might be problematic with LAPACK, otherwise useful.
 					  - Intel compilers: See manual
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-					  # Undefined behavior
+					  ## Illegal, undefined and implementation-defined behavior
 
-					  - The C/C++/Fortran standards specify a lot of cases where if you do X, the result is undefined behavior.
-					     - It might work (for some definition of *work*)
-					     - Or it might not
-					     - It might work differently depending on optimization level, compiler version, phase of the moon, whatever...
-					  - Undefined behavior is your enemy!
-					  - Typical UB: reading uninitialized memory, integer overflow. Out-of-bounds access: Invalid, not UB!
+					  - The C/C++/Fortran standards specify a lot of cases where if you do X, the result is illegal/undefined/implementation-defined.
+					  - Illegal: Not allowed
+					     - The compiler catches *some* of these, not all!
+					     - Typical examples: Out-of-bounds access, type punning
+					         - Type punning is common; GCC: -fno-strict-aliasing
+					  
+
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-					  # Sanitizers
+					  ### Undefined behavior
+
+					  - Undefined behavior: Result is, well, undefined
+					     - It might work (for some definition of *work*)
+					     - Or it might not
+					     - It might work differently depending on optimization level, compiler version, phase of the moon, whatever...
+					     - Typical UB: reading uninitialized memory, integer overflow.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Implementation-defined behavior
+
+					  - Implementation-defined behavior: It should work, but result might differ for different compilers, OS's etc.
+					     - Typical implementation-defined behavior: PRNG algorithm
+					  - Reproducible research: Your code should not rely on illegal/undefined/implementation-defined behavior.
+					     - A lot of research code is, sadly, *very* far from this goal...
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Sanitizers
 
 					  - Recent versions of GCC (and clang) support *sanitizers*
 					  - -fsanitize=xxx
 					  - address: Fast memory error detector, detect out-of-bounds access and use-after-free
 					  - thread: Data race detector
 					  - undefined: Catches many common cases of UB
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Valgrind
+
+					  - Collection of debugging and profiling tools
+					  - Most common use is the memory error detector
+					  - Does not need any particular compile options (-g useful as always)
+					  - Slows down execution *a lot* => Make sure you have a testcase that runs quickly!
+					      $ valgrind ./a.out
 					</script>
 				</section>
 
@@ -488,6 +526,115 @@ Program received signal SIGSEGV, Segmentation fault.
 main () at foo.c:5
 5		*a = 42;
 				    </code></pre>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Exercise
+
+					  - Try the example from the previous slide yourself.
+					  - Instead of GDB, try with valgrind and AddressSanitizer.
+					  - For AddressSanitizer, you want to use [asan_symbolize.py](https://address-sanitizer.googlecode.com/svn-history/r908/trunk/scripts/asan_symbolize.py)
+					      $ ./a.out 2>&1 | ./asan_symbolize.py
+
+					  - When would you want to use GDB, valgrind, or AddressSanitizer? Which one is best?
+					  - What happens without asan_symbolize.py? Why is it useful?
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Core dumps
+
+					  - Remember the error message: Segmentation fault (core dumped)
+					  - A *core* file is a snapshot of the process memory (at the time it crashed, typically).
+					  - Often shell has core file limit set to 0 => No core files
+					     - bash: ulimit -c unlimited
+					  - Start GDB, load executable with associated core file:
+					      $ gdb ./a.out core
+					</script>
+				</section>
+
+				<section>
+				  <h2>Core dumps</h2>
+				  <p>
+				    <ul>
+				      <li>Core dump an existing process. Afterward, the process continues
+					<pre><code>$ gcore PID</code></pre>
+				      <li> Why is it called a <i>core dump</i>? What is core?
+					<ul>
+					  <li>Ferrite core memory, used in early computers...
+					</ul>
+				    </ul>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Breakpoints
+
+					  - Execute a program until it hits a breakpoint, then pause it at that point and resume the debugger.
+					  - Insert a breakpoint at line 5 of file foo.c, and on entry to function bar:
+
+					      (gdb) break foo.c:5
+					      (gdb) break bar
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Single stepping, continuing
+
+					  - Continue executing until hitting the next breakpoint, or end of program: <code>(gdb) continue</code>
+					  - Execute next source line and pause: <code>(gdb) step</code>
+					  - Like *step*, but proceed through subroutine calls: <code>(gdb) next</code>
+					  - Short forms of the above: <code>c, s, n</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Program state
+
+					  - Value of a variable: <code>(gdb) print VAR</code>
+					  - Modify value of a variable: <code>(gdb) set (VAR = VALUE)</code>
+					  - Watchpoints (automatically print whenever value changes): <code>(gdb) watch VAR</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Stack frames
+
+					  - Print procedure call stack: <code>(gdb) backtrace</code>
+					     - Short form: <code>bt</code>
+					  - Jump up N stack frames: <code>(gdb) up N</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Processes and threads
+
+					  - Attach debugger to a running process: <code>$ gdb -p PID</code>
+					     - Or inside gdb: <code>(gdb) attach PID</code>
+					     - Note that this pauses the process!
+					  - List current threads of process: <code>(gdb) info threads</code>
+					  - Switch to another thread: <code>(gdb) thread N</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Debugging multi-processes applications
+
+					  - While GDB supports multi-threaded applications, there's no built-in support for multi-process applications
+					  - MPI debugging with GDB:
+					     - Launch MPI application
+					     - For each MPI rank, start a terminal, start gdb attaching to the MPI process
+					     - Debug!
+					  - If you have a CSC account, you can use TotalView (MPI debugger) which is less cumbersome than the above..
+					</script>
 				</section>
 
 				<section data-markdown>
