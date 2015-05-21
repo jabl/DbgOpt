@@ -181,6 +181,7 @@
 					  - Low level optimization these days is mostly about managing memory access
 					     - Avoiding stalling on accessing main memory.
 					     - Cache friendly algorithms
+					     - Exposing Memory Level Parallelism (MLP)
 					     - Register allocation? Don't worry, compilers are better at this than you..
 					  - In HPC, vectorization can also be important. Increasingly so with newer processors.
 					</script>
@@ -353,6 +354,7 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  transfer from main memory to
 					  caches. Typically 64 bytes
 					  on current x86.
+					     - Threads: Watch out for cacheline ping-ponging!
 					  
 					  - Caches, prefetching
 					  etc. works well with code
@@ -395,8 +397,8 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  ## Compiler debug options
 
 					  - Compilers have lots of switches to turn on warning and error messsages, use them!
-					  - For GCC: -Wall -Wextra -pedantic -Werror
-					  - GFortran: The above + -fcheck=all -ffpe-trap=invalid,zero,overflow. Note that -fcheck= makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though. -ffpe-trap might be problematic with LAPACK, otherwise useful.
+					  - For GCC: <code>-Wall -Wextra -pedantic -Werror</code>
+					  - GFortran: The above + <code>-fcheck=all -ffpe-trap=invalid,zero,overflow</code>. Note that <code>-fcheck=</code> makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though. <code>-ffpe-trap=</code> might be problematic with LAPACK, otherwise useful.
 					  - Intel compilers: See manual
 					</script>
 				</section>
@@ -409,7 +411,7 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - Illegal: Not allowed
 					     - The compiler catches *some* of these, not all!
 					     - Typical examples: Out-of-bounds access, type punning
-					         - Type punning is common; GCC: -fno-strict-aliasing
+					         - Type punning; GCC: <code>-fno-strict-aliasing</code>
 					  
 
 					</script>
@@ -444,7 +446,7 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  ## Sanitizers
 
 					  - Recent versions of GCC (and clang) support *sanitizers*
-					  - -fsanitize=xxx
+					  - <code>-fsanitize=xxx</code>
 					  - address: Fast memory error detector, detect out-of-bounds access and use-after-free
 					  - thread: Data race detector
 					  - undefined: Catches many common cases of UB
