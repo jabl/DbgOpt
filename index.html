@@ -368,12 +368,24 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 
 				<section data-markdown>
 					<script type="text/template">
+					  ### Cache addressing
+					  
+					  - Each cache entry can hold a cacheline worth of data, and some metadata (not part of the reported cache size)
+					  - A memory address is split into 3 parts from MSB to LSB: tag, set index, and offset
+					     - Offset: Byte within the cacheline
+					     - Set index: Which entry in the cache
+					     - Tag: The rest of the address, to check whether the address matches on lookup
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
 					  ### Cache associativity
 					  
-					  - The cache can be thought of as consisting of a set of *slots*, each capable if holding a cacheline worth of data.
-					  - Direct mapped cache: Each memory address can go into a single slot in the cache
+					  - The cache can be thought of as consisting of an array of sets, each capable if holding a number of cache entries (cacheline)
+					  - Direct mapped cache: Each set has room for one cacheline. One memory address can go into only one place in the cache
 					     - High possibility of *associativity conflict*
-					  - Fully associative cache: Each memory address can go into any slot in the cache
+					  - Fully associative cache: There is only one set containing all the cache entries. Each memory address can go into any entry in the cache
 					     - Complex, slow circuitry
 					</script>
 				</section>
@@ -382,10 +394,32 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					<script type="text/template">
 					  ### Set-associative cache
 					  
-					  - N-way set associative cache: Each memory address can go into N different slots in the cache. Essentially a middle ground between direct mapped and fully associative.
+					  - N-way set associative cache: Each set has room for N cachelines. Each memory address can go into N different places in the cache. Essentially a middle ground between direct mapped and fully associative.
 					     - Current CPU's typically have 4- or 8-way set associative caches
-					  - Exercise: Consider a two-dimensional array (matrix) stored in column-major ordering (Fortran, MATLAB, Julia) where the number of rows is an even multiple of the cacheline size.
-					     - Imagine accessing the matrix row-wise. What happens with the cache?
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Caching pen and paper exercise
+					  
+					  - Consider a two-dimensional 512x16 array (matrix) of double precision floating point numbers (8 bytes per number) stored in column-major ordering (Fortran, MATLAB, Julia)
+					  - Cache is 32kB 8-way set associative (matches Haswell L1D)
+					  - Cacheline size 64 bytes
+					  - Imagine accessing the matrix row-wise. How does the cache work in this scenario?
+					     - What can you, as a programmer, do about this?
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Exercise hints
+					  
+					  - Cacheline size 64 bytes => 2<sup>6</sup> bytes => 6 bits of the address for offset
+					  - Cache size 32 kB => 32 kB/64 = 512 cachelines
+					  - 512/8 = 64 cache sets => 2<sup>6</sup> => 6 bits of address for set index
+					  - Addresses 2<sup>6+6</sup> = 2<sup>12</sup> bytes apart alias and go into the same cache set
+
 					</script>
 				</section>
 
@@ -674,20 +708,66 @@ main () at foo.c:5
 
 				<section data-markdown>
 					<script type="text/template">
-					  # Profiling
+					  # Optimization and Profiling
 
-					  - Focus on perf
+					  - Optimization: Making your program run faster
+					  - Algorithmic changes tend to have the biggest benefit
+					     - Focus on algorithms and data structures appropriate for the problem at hand before micro-optimization
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-					  # Other tools
+					  ## Profiling
 
-					  - valgrind
-					  - [American fuzzy lop (afl)](http://lcamtuf.coredump.cx/afl/)
+					  - Profiler: Tool that helps you figure out where your code spends time
+					     - Intuition is very often wrong at guessing where the bottleneck is..
+					  - Two main kinds of profilers, instrumenting and sampling
+					  - Instrumenting profilers: Instruments source code so that when run, outputs profiling information
+					     - Precise counts. 
+					     - Instrumenting adds overhead. 
+					     - Example: gprof
 					</script>
 				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Sampling profilers
+
+					  - Sampling profilers: Periodically pause the program, inspects where it is, read CPU performance counters
+					     - Statistical sampling, counts are not precise 
+					     - Very low overhead, only a few %
+					     - CPU perf counters provide wealth of information. 
+					     - Example: perf, oprofile
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Introduction to perf
+
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### perf references
+
+					  - [Tutorial on perf wiki](https://perf.wiki.kernel.org/index.php/Tutorial)
+					  - [Linux perf examples](http://www.brendangregg.com/perf.html)
+					</script>
+				</section>
+
+	<section data-markdown>
+					<script type="text/template">
+					  ### Debugging and optimization exercise
+
+					  - matrix multiply from scip 2014...
+					</script>
+				</section>
+
+
 			</div>
 
 		</div>
