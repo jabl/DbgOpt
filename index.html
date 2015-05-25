@@ -718,6 +718,50 @@ main () at foo.c:5
 
 				<section data-markdown>
 					<script type="text/template">
+					  ## Optimization: Low hanging fruits
+
+					  - Use compiler optimization options.
+					  - Use a library somebody else has made and tuned.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Compiler optimization options
+
+					  - There's a near-endless list of these...
+					  - GCC: By default no optimization is done, you don't want this!
+					     - <code>-O2 -g</code> good default choice
+					     - <code>-O3 -g</code> can be useful for numerical code
+					     - <code>-Ofast -g</code> additionally turn on -ffast-math
+					     - <code>-march=core-avx-i</code> arch specific optimization
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Compiler optimization options
+
+					  - Intel:
+					     - <code>-O2 -g</code> good default choice
+					     - <code>-O3 -g</code> can be useful for numerical code
+					     - <code>-fast -g</code> even faster, may break
+					     - <code>-axcore-avx-i</code> arch specific optimization
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Libraries
+
+					  - BLAS: Use OpenBLAS or MKL
+					  - MKL also contains LAPACK, ScaLAPACK, FFTW
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
 					  ## Profiling
 
 					  - Profiler: Tool that helps you figure out where your code spends time
@@ -759,9 +803,20 @@ main () at foo.c:5
 					</script>
 				</section>
 
-	<section data-markdown>
+				<section data-markdown>
 					<script type="text/template">
-					  ### Debugging and optimization exercise
+					  # Makefiles
+
+					  - Tool to make compiling a project, consisting of several source code files, easier
+					  - Only recompile files that have changed (and files depending on them etc.)
+					  - Example makefile that you can adapt for your project at /triton/TODO
+					  - Watch out for spaces vs. tabs!
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Debugging and optimization exercise
 
 					  - matrix multiply from scip 2014...
 					</script>
