@@ -386,13 +386,13 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					  - Direct mapped cache: Each set has room for one cacheline. One memory address can go into only one place in the cache
 					     - High possibility of *associativity conflict*
 					  - Fully associative cache: There is only one set containing all the cache entries. Each memory address can go into any entry in the cache
-					     - Complex, slow circuitry
+					     - Complex circuitry; useful for small caches, e.g. TLB
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-					  ### Set-associative cache
+					  ### Set associative cache
 					  
 					  - N-way set associative cache: Each set has room for N cachelines. Each memory address can go into N different places in the cache. Essentially a middle ground between direct mapped and fully associative.
 					     - Current CPU's typically have 4- or 8-way set associative caches
