@@ -705,6 +705,28 @@ main () at foo.c:5
 					</script>
 				</section>
 		
+				<section data-markdown>
+					<script type="text/template">
+					  # Other debugging tools
+
+					  - strace: Prints system calls by application
+					  - ltrace: Like strace but (dynamic) library calls
+					  - ldd: List dynamic libraries used by executable/.so
+					  - readelf, nm: Tools to inspect object files
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Exercise: ls
+
+					  - Use strace to see what syscalls <code>ls</code> makes and try to understand what it's doing. *Hint* If you don't know what a syscall does, check the manual: <code>man foo</code>
+					  - Same as above, but check <code>ls -l</code>. What is the difference?
+					  - Use ldd to check which dynamic libraries are used by ls
+					  - Use readelf to inspect the ls binary
+					</script>
+				</section>
+		
 
 				<section data-markdown>
 					<script type="text/template">
@@ -787,11 +809,14 @@ main () at foo.c:5
 				</section>
 
 				<section data-markdown>
-					<script type="text/template">
-					  ### Introduction to perf
+				  <h3>Introduction to perf</h3>
+				  
+				  <p>
+				    perf stat: A bit like <i>time</i> but more details
+				    <pre><code data-trim>
+					$ perf stat ./a.out
+				    </code></pre>
 
-					  
-					</script>
 				</section>
 
 				<section data-markdown>
