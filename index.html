@@ -808,14 +808,22 @@ main () at foo.c:5
 					</script>
 				</section>
 
-				<section data-markdown>
+				<section>
 				  <h3>Introduction to perf</h3>
 				  
 				  <p>
-				    perf stat: A bit like <i>time</i> but more details
-				    <pre><code data-trim>
-					$ perf stat ./a.out
-				    </code></pre>
+				    <ul>
+				      <li>perf stat: A bit like <i>time</i> but more details
+					<pre><code data-trim>
+					    $ perf stat ./a.out
+					</code></pre>
+				      <li>More detailed profiling is a two step process:
+					<ol>
+					  <li>Record a profile from an application run with <code>perf record ...</code>
+					  <li>Inspect the profile with <code>perf report</code>
+					</ol>
+				      <li><code>perf list</code>: List event types that you can sample with <code>perf record -e EVENT-TYPE-LIST ...</code>
+				    </ul>
 
 				</section>
 
@@ -835,7 +843,7 @@ main () at foo.c:5
 					  - Tool to make compiling a project, consisting of several source code files, easier
 					  - Only recompile files that have changed (and files depending on them etc.)
 					  - Example makefile that you can adapt for your project at /triton/TODO
-					  - Watch out for spaces vs. tabs!
+					  - autotools: Set of tools to generate Makefiles, conditional compilation etc. Useful for larger and more complicated projects.
 					</script>
 				</section>
 
@@ -843,7 +851,10 @@ main () at foo.c:5
 					<script type="text/template">
 					  # Debugging and optimization exercise
 
-					  - matrix multiply from scip 2014...
+					  - Matrix multiplication exercise, see <code>/triton/scip/profile/matmul</code>
+					  - You can do the exercise with C or Fortran, whichever you prefer
+					  - Check the <code>README.md</code> files for more detailed instructions
+					  - Ask for help!
 					</script>
 				</section>
 
