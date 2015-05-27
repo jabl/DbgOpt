@@ -726,7 +726,32 @@ main () at foo.c:5
 					  - Use readelf to inspect the ls binary
 					</script>
 				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## The dynamic linker (ld.so)
+
+					  - Dynamic linking: Use libraries stored separately in the filesystem instead of copying library code into application binary
+					     - Security updates
+					     - Save disk and page cache space
+					  - Library search path: Where to search for libraries
+					     - <code>ldconfig -p</code> to print current list of system libraries
+					     - <code>LD_LIBRARY_PATH</code> environment variable
+					  - See <code>ld.so(8)</code> man page
+					</script>
+				</section>
 		
+				<section data-markdown>
+					<script type="text/template">
+					  ## ld.so search paths
+
+					  - module system: Typically a module will add to LD_LIBRARY_PATH
+					     - Allows overriding system libraries on a per-module basis
+					  - Alternative: Set <code>LD_RUN_PATH</code> when compiling => paths will be stored in binary, DT_RUNPATH section
+					     - Allow overriding system libraries on a per-application basis
+					     - Must recompile if paths change!
+					</script>
+				</section>
 
 				<section data-markdown>
 					<script type="text/template">
