@@ -718,17 +718,6 @@ main () at foo.c:5
 
 				<section data-markdown>
 					<script type="text/template">
-					  ## Exercise: ls
-
-					  - Use strace to see what syscalls <code>ls</code> makes and try to understand what it's doing. *Hint* If you don't know what a syscall does, check the manual: <code>man foo</code>
-					  - Same as above, but check <code>ls -l</code>. What is the difference?
-					  - Use ldd to check which dynamic libraries are used by ls
-					  - Use readelf to inspect the ls binary
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
 					  ## The dynamic linker (ld.so)
 
 					  - Dynamic linking: Use libraries stored separately in the filesystem instead of copying library code into application binary
@@ -750,6 +739,30 @@ main () at foo.c:5
 					  - Alternative: Set <code>LD_RUN_PATH</code> when compiling => paths will be stored in binary, DT_RUNPATH section
 					     - Allow overriding system libraries on a per-application basis
 					     - Must recompile if paths change!
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## ld.so search paths caveats
+
+					  - Order in which entries are added to LD_LIBRARY_PATH matters
+					     - module load order matters!
+					  - Various tools work similar to module
+					     - <code>virtualenv</code> (python) etc.
+					  - Combining these, not being careful w.r.t. ordering can get you into quite a pickle
+					  - <code>ldd</code> is very useful to figure out where the libraries are loaded from
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Exercise: ls
+
+					  - Use strace to see what syscalls <code>ls</code> makes and try to understand what it's doing. *Hint* If you don't know what a syscall does, check the manual: <code>man foo</code>
+					  - Same as above, but check <code>ls -l</code>. What is the difference?
+					  - Use ldd to check which dynamic libraries are used by ls
+					  - Use readelf to inspect the ls binary
 					</script>
 				</section>
 
