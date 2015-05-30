@@ -56,10 +56,9 @@
 					  Richard Darst has explained the basics of debugging, profiling, and optimizing using python. What follows here is an overview of what additional issues needs to be taken into account when working with lower level languages like C, C++, or Fortran, as well as an introduction to useful tools for these languages.
 
 					  - On language choice
+					  - Debugging
 					  - Brief introduction to modern CPU and memory architectures
-					  - Using the GNU debugger
-					  - Using the perf profiler
-					  - MPI debugging and profiling tools on Triton
+					  - Profiling
 					</script>
 				</section>
 
@@ -72,7 +71,7 @@
 					  Typically, programming languages can be classified into high level and low level languages.
 
 					  - High level languages such as Python emphasise programmer productivity, typically at the expense of performance.
-					  - Low level languages such as C, C++, Fortran tend to be somewhat more aligned with how the hardware operates, and often lack safety features.
+					  - Low level languages such as C, C++, Fortran tend to be somewhat more aligned with how the hardware operates, and often lack safety features. This part of the course focuses on these.
 					</script>
 				</section>
 
@@ -882,8 +881,9 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 
 					  - Tool to make compiling a project, consisting of several source code files, easier
 					  - Only recompile files that have changed (and files depending on them etc.)
-					  - Example makefile that you can adapt for your project at /triton/TODO
+					  - Example makefile that you can adapt for your project as part of the next exercise
 					  - autotools: Set of tools to generate Makefiles, conditional compilation etc. Useful for larger and more complicated projects.
+					  - cmake: A tool to generate Makefiles, similar to autotools
 					</script>
 				</section>
 
