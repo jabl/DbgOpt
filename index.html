@@ -732,26 +732,25 @@ main () at foo.c:5
 		
 				<section data-markdown>
 					<script type="text/template">
-					  ## ld.so search paths
+					  ### LD_RUN_PATH
 
-					  - module system: Typically a module will add to LD_LIBRARY_PATH
-					     - Allows overriding system libraries on a per-module basis
-					  - Alternative: Set <code>LD_RUN_PATH</code> when compiling => paths will be stored in binary, DT_RPATH section
+					  - Alternative to <code>LD_LIBRARY_PATH</code>: Set <code>LD_RUN_PATH</code> when *compiling*=> paths will be stored in binary, DT_RPATH section
 					     - Allow overriding system libraries on a per-application basis
 					     - Must recompile if paths change!
-					     - With <code>-Wl,rpath=youpath,--enable-new-dtags</code> to set DT_RUNPATH (searched AFTER LD_LIBRARY_PATH
+					     - With <code>-Wl,rpath=your/path,--enable-new-dtags</code> to set DT_RUNPATH (searched AFTER LD_LIBRARY_PATH
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-					  ## ld.so search paths caveats
+					  ### ld.so search paths caveats
 
-					  - Order in which entries are added to LD_LIBRARY_PATH matters
-					     - module load order matters!
-					  - Various tools work similar to module
-					     - <code>virtualenv</code> (python) etc.
-					  - Combining these, not being careful w.r.t. ordering can get you into quite a pickle
+					  - Order of entries in LD_LIBRARY_PATH matters
+					  - module system: Typically a module will add to LD_LIBRARY_PATH
+					     - => module load order matters!
+
+					  - Various tools work similar to module, e.g. <code>virtualenv</code> (python)
+					  - Combining these, not being careful w.r.t. ordering can get you into quite a pickle. Be disciplined!
 					  - <code>ldd</code> is very useful to figure out where the libraries are loaded from
 					</script>
 				</section>
