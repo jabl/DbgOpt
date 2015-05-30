@@ -736,9 +736,10 @@ main () at foo.c:5
 
 					  - module system: Typically a module will add to LD_LIBRARY_PATH
 					     - Allows overriding system libraries on a per-module basis
-					  - Alternative: Set <code>LD_RUN_PATH</code> when compiling => paths will be stored in binary, DT_RUNPATH section
+					  - Alternative: Set <code>LD_RUN_PATH</code> when compiling => paths will be stored in binary, DT_RPATH section
 					     - Allow overriding system libraries on a per-application basis
 					     - Must recompile if paths change!
+					     - With <code>-Wl,rpath=youpath,--enable-new-dtags</code> to set DT_RUNPATH (searched AFTER LD_LIBRARY_PATH
 					</script>
 				</section>
 
