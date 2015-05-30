@@ -92,6 +92,337 @@
 
 				<section data-markdown>
 					<script type="text/template">
+					  # Debugging
+
+					  - Debugging, the process of finding and correcting programming errors
+					  - Richard has covered general debugging topics and python specific stuff
+					     - This part is about debugging C/C++/Fortran code
+					  - General debugging options for the compiler
+					  - A few useful debugging tools
+					  - GDB tutorial
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Compiler debug options
+
+					  - Compilers have lots of switches to turn on warning and error messsages, use them!
+					  - For GCC: <code>-Wall -Wextra -pedantic -Werror</code>
+					  - GFortran: The above + <code>-fcheck=all -ffpe-trap=invalid,zero,overflow</code>. Note that <code>-fcheck=</code> makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though. <code>-ffpe-trap=</code> might be problematic with LAPACK, otherwise useful.
+					  - Intel compilers: See manual
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Illegal, undefined and implementation-defined behavior
+
+					  - The C/C++/Fortran standards specify a lot of cases where if you do X, the result is illegal/undefined/implementation-defined.
+					  - Illegal: Not allowed
+					     - The compiler catches *some* of these, not all!
+					     - Typical examples: Out-of-bounds access, type punning
+					         - Type punning; GCC: <code>-fno-strict-aliasing</code>
+					  
+
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Undefined behavior
+
+					  - Undefined behavior: Result is, well, undefined
+					     - It might work (for some definition of *work*)
+					     - Or it might not
+					     - It might work differently depending on optimization level, compiler version, phase of the moon, whatever...
+					     - Typical UB: reading uninitialized memory, integer overflow.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### Implementation-defined behavior
+
+					  - Implementation-defined behavior: It should work, but result might differ for different compilers, OS's etc.
+					     - Typical implementation-defined behavior: PRNG algorithm
+					  - Reproducible research: Your code should not rely on illegal/undefined/implementation-defined behavior.
+					     - A lot of research code is, sadly, *very* far from this goal...
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Sanitizers
+
+					  - Recent versions of GCC (and clang) support *sanitizers*
+					  - <code>-fsanitize=xxx</code>
+					  - address: Fast memory error detector, detect out-of-bounds access and use-after-free
+					  - thread: Data race detector
+					  - undefined: Catches many common cases of UB
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Valgrind
+
+					  - Collection of debugging and profiling tools
+					  - Most common use is the memory error detector
+					  - Does not need any particular compile options (-g useful as always)
+					  - Slows down execution *a lot* => Make sure you have a testcase that runs quickly!
+					      $ valgrind ./a.out
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # Introduction to GDB
+
+					  - GDB, the GNU debugger, is the standard debugger on Linux for C, C++, Fortran and several other languages that compile to native code
+					  - Continuously developed since 1986
+					  - LOTS of features; Here we concentrate on a VERY SMALL subset of the most common operations
+					  - Various graphical frontends also available. E.g. Eclipse, DDD.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Why use a debugger
+
+					  - printf() debugging: Insert print calls in your program, deduce where the bug is
+					    - Simple
+					    - ...but time-consuming
+					  - A debugger lets you run the program, stop it where you want (breakpoints), inspect and modify the program state, etc.
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Getting started
+
+					  Always include -g in your compile options. This adds *debug symbols* to your executable.
+
+					  - Even if you're not explicitly debugging your code. Makes debugging easier if you encounter an unexpected error later.
+					  - Makes the executable bigger, but this is in practice never an issue in HPC
+					  - With higher optimization levels a lot of transformations are done on the code
+					     - Difficult to see how the code you're debugging corresponds to the source code. GCC 4.8+: -Og
+					  
+					</script>
+				</section>
+
+				<section>
+				  <h2>Simple GDB example</h2>
+
+				  <p>
+				    foo.c:
+				    <pre><code data-trim>
+#include &lt;stdio.h>
+int main()
+{
+	int *a = NULL;
+	*a = 42;
+	printf("%d\n", *a);
+	return 0;
+}
+				    </code></pre>
+
+				    <pre><code data-trim>
+$ gcc -Og -g foo.c
+$ ./a.out
+Segmentation fault (core dumped)
+$ gdb ./a.out
+(gdb) r
+Program received signal SIGSEGV, Segmentation fault.
+main () at foo.c:5
+5		*a = 42;
+				    </code></pre>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Exercise
+
+					  - Try the example from the previous slide yourself.
+					  - Instead of GDB, try with valgrind and AddressSanitizer.
+					  - For AddressSanitizer, you want to use [asan_symbolize.py](https://address-sanitizer.googlecode.com/svn-history/r908/trunk/scripts/asan_symbolize.py)
+					      $ ./a.out 2>&1 | ./asan_symbolize.py
+
+					  - When would you want to use GDB, valgrind, or AddressSanitizer? Which one is best?
+					  - What happens without asan_symbolize.py? Why is it useful?
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Core dumps
+
+					  - Remember the error message: Segmentation fault (core dumped)
+					  - A *core* file is a snapshot of the process memory (at the time it crashed, typically).
+					  - Often shell has core file limit set to 0 => No core files
+					     - bash: ulimit -c unlimited
+					  - Start GDB, load executable with associated core file:
+					      $ gdb ./a.out core
+					</script>
+				</section>
+
+				<section>
+				  <h2>Core dumps</h2>
+				  <p>
+				    <ul>
+				      <li>Core dump an existing process. Afterward, the process continues
+					<pre><code>$ gcore PID</code></pre>
+				      <li> Why is it called a <i>core dump</i>? What is core?
+					<ul>
+					  <li>Ferrite core memory, used in early computers...
+					</ul>
+				    </ul>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Breakpoints
+
+					  - Execute a program until it hits a breakpoint, then pause it at that point and resume the debugger.
+					  - Insert a breakpoint at line 5 of file foo.c, and on entry to function bar:
+
+					      (gdb) break foo.c:5
+					      (gdb) break bar
+					  
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Single stepping, continuing
+
+					  - Continue executing until hitting the next breakpoint, or end of program: <code>(gdb) continue</code>
+					  - Execute next source line and pause: <code>(gdb) step</code>
+					  - Like *step*, but proceed through subroutine calls: <code>(gdb) next</code>
+					  - Short forms of the above: <code>c, s, n</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Program state
+
+					  - Value of a variable: <code>(gdb) print VAR</code>
+					  - Modify value of a variable: <code>(gdb) set (VAR = VALUE)</code>
+					  - Watchpoints (automatically print whenever value changes): <code>(gdb) watch VAR</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Stack frames
+
+					  - Print procedure call stack: <code>(gdb) backtrace</code>
+					     - Short form: <code>bt</code>
+					  - Jump up N stack frames: <code>(gdb) up N</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Processes and threads
+
+					  - Attach debugger to a running process: <code>$ gdb -p PID</code>
+					     - Or inside gdb: <code>(gdb) attach PID</code>
+					     - Note that this pauses the process!
+					  - List current threads of process: <code>(gdb) info threads</code>
+					  - Switch to another thread: <code>(gdb) thread N</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Debugging multi-processes applications
+
+					  - While GDB supports multi-threaded applications, there's no built-in support for multi-process applications
+					  - MPI debugging with GDB:
+					     - Launch MPI application
+					     - For each MPI rank, start a terminal, start gdb attaching to the MPI process
+					     - Debug!
+					  - If you have a CSC account, you can use TotalView (MPI debugger) which is less cumbersome than the above..
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  # GDB References
+
+					  - [GDB Manual](http://sourceware.org/gdb/current/onlinedocs/gdb/)
+					  - [Beej's Quick Guide to GDB](http://beej.us/guide/bggdb/)
+					</script>
+				</section>
+		
+				<section data-markdown>
+					<script type="text/template">
+					  # Other debugging tools
+
+					  - strace: Prints system calls by application
+					  - ltrace: Like strace but (dynamic) library calls
+					  - ldd: List dynamic libraries used by executable/.so
+					  - readelf, nm: Tools to inspect object files
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## The dynamic linker (ld.so)
+
+					  - Dynamic linking: Use libraries stored separately in the filesystem instead of copying library code into application binary
+					     - Security updates
+					     - Save disk and page cache space
+					  - Library search path: Where to search for libraries
+					     - <code>ldconfig -p</code> to print current list of system libraries
+					     - <code>LD_LIBRARY_PATH</code> environment variable
+					  - See <code>ld.so(8)</code> man page
+					</script>
+				</section>
+		
+				<section data-markdown>
+					<script type="text/template">
+					  ### LD_RUN_PATH
+
+					  - Alternative to <code>LD_LIBRARY_PATH</code>: Set <code>LD_RUN_PATH</code> when *compiling*=> paths will be stored in binary, DT_RPATH section
+					     - Allow overriding system libraries on a per-application basis
+					     - Must recompile if paths change!
+					     - With <code>-Wl,rpath=your/path,--enable-new-dtags</code> to set DT_RUNPATH (searched AFTER LD_LIBRARY_PATH
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ### ld.so search paths caveats
+
+					  - Order of entries in LD_LIBRARY_PATH matters
+					  - module system: Typically a module will add to LD_LIBRARY_PATH
+					     - => module load order matters!
+
+					  - Various tools work similar to module, e.g. <code>virtualenv</code> (python)
+					  - Combining these, not being careful w.r.t. ordering can get you into quite a pickle. Be disciplined!
+					  - <code>ldd</code> is very useful to figure out where the libraries are loaded from
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Exercise: ls
+
+					  - Use strace to see what syscalls <code>ls</code> makes and try to understand what it's doing. *Hint* If you don't know what a syscall does, check the manual: <code>man foo</code>
+					  - Same as above, but check <code>ls -l</code>. What is the difference?
+					  - Use ldd to check which dynamic libraries are used by ls
+					  - Use readelf to inspect the ls binary
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
 					  # Brief introduction to CPU and memory architecture
 
 					  
@@ -436,335 +767,6 @@ Send packet CA->Netherlands->CA     150,000,000   ns
 					</script>
 				</section>
 
-				<section data-markdown>
-					<script type="text/template">
-					  # Debugging
-
-					  - Debugging, the process of finding and correcting programming errors
-					  - Richard has covered general debugging topics and python specific stuff
-					     - This part is about debugging C/C++/Fortran code
-					  - General debugging options for the compiler
-					  - A few useful debugging tools
-					  - GDB tutorial
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Compiler debug options
-
-					  - Compilers have lots of switches to turn on warning and error messsages, use them!
-					  - For GCC: <code>-Wall -Wextra -pedantic -Werror</code>
-					  - GFortran: The above + <code>-fcheck=all -ffpe-trap=invalid,zero,overflow</code>. Note that <code>-fcheck=</code> makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though. <code>-ffpe-trap=</code> might be problematic with LAPACK, otherwise useful.
-					  - Intel compilers: See manual
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Illegal, undefined and implementation-defined behavior
-
-					  - The C/C++/Fortran standards specify a lot of cases where if you do X, the result is illegal/undefined/implementation-defined.
-					  - Illegal: Not allowed
-					     - The compiler catches *some* of these, not all!
-					     - Typical examples: Out-of-bounds access, type punning
-					         - Type punning; GCC: <code>-fno-strict-aliasing</code>
-					  
-
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ### Undefined behavior
-
-					  - Undefined behavior: Result is, well, undefined
-					     - It might work (for some definition of *work*)
-					     - Or it might not
-					     - It might work differently depending on optimization level, compiler version, phase of the moon, whatever...
-					     - Typical UB: reading uninitialized memory, integer overflow.
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ### Implementation-defined behavior
-
-					  - Implementation-defined behavior: It should work, but result might differ for different compilers, OS's etc.
-					     - Typical implementation-defined behavior: PRNG algorithm
-					  - Reproducible research: Your code should not rely on illegal/undefined/implementation-defined behavior.
-					     - A lot of research code is, sadly, *very* far from this goal...
-					  
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Sanitizers
-
-					  - Recent versions of GCC (and clang) support *sanitizers*
-					  - <code>-fsanitize=xxx</code>
-					  - address: Fast memory error detector, detect out-of-bounds access and use-after-free
-					  - thread: Data race detector
-					  - undefined: Catches many common cases of UB
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Valgrind
-
-					  - Collection of debugging and profiling tools
-					  - Most common use is the memory error detector
-					  - Does not need any particular compile options (-g useful as always)
-					  - Slows down execution *a lot* => Make sure you have a testcase that runs quickly!
-					      $ valgrind ./a.out
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  # Introduction to GDB
-
-					  - GDB, the GNU debugger, is the standard debugger on Linux for C, C++, Fortran and several other languages that compile to native code
-					  - Continuously developed since 1986
-					  - LOTS of features; Here we concentrate on a VERY SMALL subset of the most common operations
-					  - Various graphical frontends also available. E.g. Eclipse, DDD.
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Why use a debugger
-
-					  - printf() debugging: Insert print calls in your program, deduce where the bug is
-					    - Simple
-					    - ...but time-consuming
-					  - A debugger lets you run the program, stop it where you want (breakpoints), inspect and modify the program state, etc.
-					  
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Getting started
-
-					  Always include -g in your compile options. This adds *debug symbols* to your executable.
-
-					  - Even if you're not explicitly debugging your code. Makes debugging easier if you encounter an unexpected error later.
-					  - Makes the executable bigger, but this is in practice never an issue in HPC
-					  - With higher optimization levels a lot of transformations are done on the code
-					     - Difficult to see how the code you're debugging corresponds to the source code. GCC 4.8+: -Og
-					  
-					</script>
-				</section>
-
-				<section>
-				  <h2>Simple GDB example</h2>
-
-				  <p>
-				    foo.c:
-				    <pre><code data-trim>
-#include &lt;stdio.h>
-int main()
-{
-	int *a = NULL;
-	*a = 42;
-	printf("%d\n", *a);
-	return 0;
-}
-				    </code></pre>
-
-				    <pre><code data-trim>
-$ gcc -Og -g foo.c
-$ ./a.out
-Segmentation fault (core dumped)
-$ gdb ./a.out
-(gdb) r
-Program received signal SIGSEGV, Segmentation fault.
-main () at foo.c:5
-5		*a = 42;
-				    </code></pre>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Exercise
-
-					  - Try the example from the previous slide yourself.
-					  - Instead of GDB, try with valgrind and AddressSanitizer.
-					  - For AddressSanitizer, you want to use [asan_symbolize.py](https://address-sanitizer.googlecode.com/svn-history/r908/trunk/scripts/asan_symbolize.py)
-					      $ ./a.out 2>&1 | ./asan_symbolize.py
-
-					  - When would you want to use GDB, valgrind, or AddressSanitizer? Which one is best?
-					  - What happens without asan_symbolize.py? Why is it useful?
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Core dumps
-
-					  - Remember the error message: Segmentation fault (core dumped)
-					  - A *core* file is a snapshot of the process memory (at the time it crashed, typically).
-					  - Often shell has core file limit set to 0 => No core files
-					     - bash: ulimit -c unlimited
-					  - Start GDB, load executable with associated core file:
-					      $ gdb ./a.out core
-					</script>
-				</section>
-
-				<section>
-				  <h2>Core dumps</h2>
-				  <p>
-				    <ul>
-				      <li>Core dump an existing process. Afterward, the process continues
-					<pre><code>$ gcore PID</code></pre>
-				      <li> Why is it called a <i>core dump</i>? What is core?
-					<ul>
-					  <li>Ferrite core memory, used in early computers...
-					</ul>
-				    </ul>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Breakpoints
-
-					  - Execute a program until it hits a breakpoint, then pause it at that point and resume the debugger.
-					  - Insert a breakpoint at line 5 of file foo.c, and on entry to function bar:
-
-					      (gdb) break foo.c:5
-					      (gdb) break bar
-					  
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Single stepping, continuing
-
-					  - Continue executing until hitting the next breakpoint, or end of program: <code>(gdb) continue</code>
-					  - Execute next source line and pause: <code>(gdb) step</code>
-					  - Like *step*, but proceed through subroutine calls: <code>(gdb) next</code>
-					  - Short forms of the above: <code>c, s, n</code>
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Program state
-
-					  - Value of a variable: <code>(gdb) print VAR</code>
-					  - Modify value of a variable: <code>(gdb) set (VAR = VALUE)</code>
-					  - Watchpoints (automatically print whenever value changes): <code>(gdb) watch VAR</code>
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Stack frames
-
-					  - Print procedure call stack: <code>(gdb) backtrace</code>
-					     - Short form: <code>bt</code>
-					  - Jump up N stack frames: <code>(gdb) up N</code>
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Processes and threads
-
-					  - Attach debugger to a running process: <code>$ gdb -p PID</code>
-					     - Or inside gdb: <code>(gdb) attach PID</code>
-					     - Note that this pauses the process!
-					  - List current threads of process: <code>(gdb) info threads</code>
-					  - Switch to another thread: <code>(gdb) thread N</code>
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Debugging multi-processes applications
-
-					  - While GDB supports multi-threaded applications, there's no built-in support for multi-process applications
-					  - MPI debugging with GDB:
-					     - Launch MPI application
-					     - For each MPI rank, start a terminal, start gdb attaching to the MPI process
-					     - Debug!
-					  - If you have a CSC account, you can use TotalView (MPI debugger) which is less cumbersome than the above..
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  # GDB References
-
-					  - [GDB Manual](http://sourceware.org/gdb/current/onlinedocs/gdb/)
-					  - [Beej's Quick Guide to GDB](http://beej.us/guide/bggdb/)
-					</script>
-				</section>
-		
-				<section data-markdown>
-					<script type="text/template">
-					  # Other debugging tools
-
-					  - strace: Prints system calls by application
-					  - ltrace: Like strace but (dynamic) library calls
-					  - ldd: List dynamic libraries used by executable/.so
-					  - readelf, nm: Tools to inspect object files
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## The dynamic linker (ld.so)
-
-					  - Dynamic linking: Use libraries stored separately in the filesystem instead of copying library code into application binary
-					     - Security updates
-					     - Save disk and page cache space
-					  - Library search path: Where to search for libraries
-					     - <code>ldconfig -p</code> to print current list of system libraries
-					     - <code>LD_LIBRARY_PATH</code> environment variable
-					  - See <code>ld.so(8)</code> man page
-					</script>
-				</section>
-		
-				<section data-markdown>
-					<script type="text/template">
-					  ### LD_RUN_PATH
-
-					  - Alternative to <code>LD_LIBRARY_PATH</code>: Set <code>LD_RUN_PATH</code> when *compiling*=> paths will be stored in binary, DT_RPATH section
-					     - Allow overriding system libraries on a per-application basis
-					     - Must recompile if paths change!
-					     - With <code>-Wl,rpath=your/path,--enable-new-dtags</code> to set DT_RUNPATH (searched AFTER LD_LIBRARY_PATH
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ### ld.so search paths caveats
-
-					  - Order of entries in LD_LIBRARY_PATH matters
-					  - module system: Typically a module will add to LD_LIBRARY_PATH
-					     - => module load order matters!
-
-					  - Various tools work similar to module, e.g. <code>virtualenv</code> (python)
-					  - Combining these, not being careful w.r.t. ordering can get you into quite a pickle. Be disciplined!
-					  - <code>ldd</code> is very useful to figure out where the libraries are loaded from
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-					  ## Exercise: ls
-
-					  - Use strace to see what syscalls <code>ls</code> makes and try to understand what it's doing. *Hint* If you don't know what a syscall does, check the manual: <code>man foo</code>
-					  - Same as above, but check <code>ls -l</code>. What is the difference?
-					  - Use ldd to check which dynamic libraries are used by ls
-					  - Use readelf to inspect the ls binary
-					</script>
-				</section>
 
 				<section data-markdown>
 					<script type="text/template">
