@@ -102,16 +102,6 @@
 					</script>
 				</section>
 
-				<section data-markdown>
-					<script type="text/template">
-					  ## Compiler debug options
-
-					  - Compilers have lots of switches to turn on warning and error messsages, use them!
-					  - For GCC: <code>-Wall -Wextra -pedantic -Werror</code>
-					  - GFortran: The above + <code>-fcheck=all -ffpe-trap=invalid,zero,overflow</code>. Note that <code>-fcheck=</code> makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though. <code>-ffpe-trap=</code> might be problematic with LAPACK, otherwise useful.
-					  - Intel compilers: See manual
-					</script>
-				</section>
 
 				<section data-markdown>
 					<script type="text/template">
@@ -150,6 +140,18 @@
 					  
 					</script>
 				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					  ## Compiler debug options
+
+					  - Compilers have lots of switches to turn on warning and error messsages, use them!
+					  - For GCC: <code>-Wall -Wextra -pedantic -Werror</code>
+					  - GFortran: The above + <code>-fcheck=all -ffpe-trap=invalid,zero,overflow</code>. Note that <code>-fcheck=</code> makes the code *a lot* slower, so don't use it for production builds. Good for debugging, though. <code>-ffpe-trap=</code> might be problematic with LAPACK, otherwise useful.
+					  - Intel compilers: See manual
+					</script>
+				</section>
+
 
 				<section data-markdown>
 					<script type="text/template">
